@@ -80,7 +80,7 @@ if(isset($_POST['forminscription']))
 		<table>
 			<tr>
 				<td align="right">
-					<label for="pseudo" style="color: #fff;">Pseudo :</label>
+					<label for="pseudo">Pseudo :</label>
 				</td>
 				<td>				
 					<input type="text" placeholder="Votre pseudo" id="pseudo" name="pseudo" value="<?php if(isset($pseudo)) { echo $pseudo; }?>" />
@@ -88,7 +88,7 @@ if(isset($_POST['forminscription']))
 			</tr>
 			<tr>
 				<td align="right">
-					<label for="mail" style="color: #fff;">Mail :</label>
+					<label for="mail">Mail :</label>
 				</td>
 				<td>				
 					<input type="email" placeholder="Votre mail" id="mail" name="mail" value="<?php if(isset($mail)) { echo $mail; }?>"/>
@@ -96,7 +96,7 @@ if(isset($_POST['forminscription']))
 			</tr>
 			<tr>
 				<td align="right">
-					<label for="mail2" style="color: #fff;">Mail de confirmation :</label>
+					<label for="mail2">Mail de confirmation :</label>
 				</td>
 				<td>				
 					<input type="email" placeholder="Confirmez votre mail " id="mail2" name="mail2" />
@@ -104,7 +104,7 @@ if(isset($_POST['forminscription']))
 			</tr>
 			<tr>
 				<td align="right">
-					<label for="mdp" style="color: #fff;">Mot de passe :</label>
+					<label for="mdp">Mot de passe :</label>
 				</td>
 				<td>				
 					<input type="password" placeholder="Votre mot de passe" id="mdp" name="mdp" />
@@ -112,7 +112,7 @@ if(isset($_POST['forminscription']))
 			</tr>
 			<tr>
 				<td align="right">
-					<label for="mdp2" style="color: #fff;">Confirmation du mot de passe :</label>
+					<label for="mdp2">Confirmation du mot de passe :</label>
 				</td>
 				<td>				
 					<input type="password" placeholder="Confirmez votre mdp" id="mdp2" name="mdp2" />
@@ -126,6 +126,63 @@ if(isset($_POST['forminscription']))
 				</td>
 			</tr>
 		</table>
+	</form>
+	<?php
+	if (isset($erreur))
+	{
+		echo '<font color="red">'.$erreur."</font>";
+	}
+	?>
+</body>
+</html>
+
+<?php
+session_start();
+
+$bdd = new PDO('mysql:host=127.0.0.1;dbname=espace_membre', 'root', '');
+if(isset($_POST['fromconnexion']))
+{
+	$mailconnect = htmlspecialchars($_POST['mailconnect']);
+	$mdpconnect = sha1($_POST['mdpconnect']);
+	if(!empty($mailconnect) AND !empty($mdpconnect))
+	{
+		$requser = $bdd->prepare("SELECT * FROM membres WHERE mail = ? AND motdepasse = ? ");
+		$requser->execute(array($mailconnect, $mdpconnect));
+		$userexist = $requser->rowCount();
+		if($userexist == 1)
+		{
+			$userinfo = $requser->fetch();
+			$_SESSION['id'] = $userinfo['id'];
+			$SESSION['pseudo'] = $userinfo['pseudo'];
+			$SESSION['mail'] = $userinfo['mail'];
+			header("Location: profil.php?id=".$_SESSION['id']);
+		}
+		else
+		{
+			$erreur = "Mauvais mail ou mot de passe !";
+		}
+	}
+	else
+	{
+		$erreur = "Tous les champs doivent être compétés !";
+	}
+}
+
+?>
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Connexion</title>
+	<meta charset="utf-8">
+</head>
+<body>
+	<div align="center">	
+	<h2>Connexion</h2>
+	<br /><br /><br />
+	<form method="POST" action="">
+		<input type="text" name="mailconnect" placeholder="Mail" />
+		<input type="password" name="mdpconnect" placeholder="Mot de passe" />
+		<input type="submit" name="fromconnexion" value="Se connecter !" />
 	</form>
 	<?php
 	if (isset($erreur))
